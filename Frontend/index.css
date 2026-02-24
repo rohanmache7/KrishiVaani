@@ -1,0 +1,653 @@
+import React, { useState, useEffect } from 'react';
+
+const App = () => {
+  // Language data
+  const translations = {
+    en: {
+      title: "Soil Health Monitor",
+      dashboard: "Dashboard",
+      soilParams: "Soil Parameters",
+      moisture: "Moisture",
+      ph: "pH Level",
+      temperature: "Temperature",
+      nitrogen: "Nitrogen",
+      phosphorus: "Phosphorus",
+      potassium: "Potassium",
+      healthScore: "Soil Health Score",
+      recommendations: "Crop Recommendations",
+      fertilizer: "Fertilizer Suggestions",
+      irrigation: "Irrigation Schedule",
+      alerts: "Alerts",
+      region: "Region",
+      excellent: "Excellent",
+      good: "Good",
+      moderate: "Moderate",
+      poor: "Poor",
+      critical: "Critical",
+      nextIrrigation: "Next Irrigation",
+      hours: "hours",
+      days: "days",
+      kg: "kg",
+      perAcre: "per acre",
+      suitable: "Suitable Crops",
+      fertilizers: "Recommended Fertilizers",
+      urea: "Urea",
+      dap: "DAP",
+      mop: "MOP",
+      settings: "Settings",
+      language: "Language",
+      manualEntry: "Manual Entry",
+      save: "Save",
+      selectCrop: "Select Crop",
+      weatherAlert: "Weather Alert",
+      soilAlert: "Soil Alert"
+    },
+    hi: {
+      title: "मिट्टी स्वास्थ्य मॉनिटर",
+      dashboard: "डैशबोर्ड",
+      soilParams: "मिट्टी के पैरामीटर",
+      moisture: "नमी",
+      ph: "पीएच स्तर",
+      temperature: "तापमान",
+      nitrogen: "नाइट्रोजन",
+      phosphorus: "फास्फोरस",
+      potassium: "पोटेशियम",
+      healthScore: "मिट्टी स्वास्थ्य स्कोर",
+      recommendations: "फसल सुझाव",
+      fertilizer: "उर्वरक सुझाव",
+      irrigation: "सिंचाई कार्यक्रम",
+      alerts: "चेतावनी",
+      region: "क्षेत्र",
+      excellent: "उत्कृष्ट",
+      good: "अच्छा",
+      moderate: "मध्यम",
+      poor: "खराब",
+      critical: "गंभीर",
+      nextIrrigation: "अगली सिंचाई",
+      hours: "घंटे",
+      days: "दिन",
+      kg: "किग्रा",
+      perAcre: "प्रति एकड़",
+      suitable: "उपयुक्त फसलें",
+      fertilizers: "सुझावित उर्वरक",
+      urea: "यूरिया",
+      dap: "डीएपी",
+      mop: "एमओपी",
+      settings: "सेटिंग्स",
+      language: "भाषा",
+      manualEntry: "मैन्युअल एंट्री",
+      save: "सेव करें",
+      selectCrop: "फसल चुनें",
+      weatherAlert: "मौसम चेतावनी",
+      soilAlert: "मिट्टी चेतावनी"
+    },
+    te: {
+      title: "మట్టి ఆరోగ్య పర్యవేక్షణ",
+      dashboard: "డాష్‌బోర్డ్",
+      soilParams: "మట్టి పారామీటర్లు",
+      moisture: "తేమ",
+      ph: "పీహెచ్ స్థాయి",
+      temperature: "ఉష్ణోగ్రత",
+      nitrogen: "నత్రజని",
+      phosphorus: "భాస్వరం",
+      potassium: "పొటాషియం",
+      healthScore: "మట్టి ఆరోగ్య స్కోర్",
+      recommendations: "పంట సిఫార్సులు",
+      fertilizer: "ఎరువుల సిఫార్సులు",
+      irrigation: "నీటిపారుదల కార్యక్రమం",
+      alerts: "హెచ్చరికలు",
+      region: "ప్రాంతం",
+      excellent: "అద్భుతం",
+      good: "మంచిది",
+      moderate: "మధ్యమ",
+      poor: "దారుణం",
+      critical: "విమర్శనాత్మక",
+      nextIrrigation: "తదుపరి నీటిపారుదల",
+      hours: "గంటలు",
+      days: "రోజులు",
+      kg: "కిలో",
+      perAcre: "ఎకరానికి",
+      suitable: "తగిన పంటలు",
+      fertilizers: "సిఫార్సు చేయబడిన ఎరువులు",
+      urea: "యూరియా",
+      dap: "డిఎపి",
+      mop: "ఎంఓపి",
+      settings: "సెట్టింగ్‌లు",
+      language: "భాష",
+      manualEntry: "మాన్యువల్ ఎంట్రీ",
+      save: "సేవ్ చేయండి",
+      selectCrop: "పంటను ఎంచుకోండి",
+      weatherAlert: "వాతావరణ హెచ్చరిక",
+      soilAlert: "మట్టి హెచ్చరిక"
+    }
+  };
+
+  // State management
+  const [language, setLanguage] = useState('en');
+  const [currentRegion, setCurrentRegion] = useState('maharashtra');
+  const [selectedCrop, setSelectedCrop] = useState('rice');
+  const [showManualEntry, setShowManualEntry] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+
+  // Soil data state
+  const [soilData, setSoilData] = useState({
+    moisture: 65,
+    ph: 6.8,
+    temperature: 28,
+    nitrogen: 245,
+    phosphorus: 18,
+    potassium: 156,
+    lastUpdated: new Date()
+  });
+
+  // Indian regions data
+  const regionData = {
+    maharashtra: {
+      name: 'Maharashtra',
+      weather: { temp: 32, humidity: 68, rainfall: 25 },
+      soilType: 'Black Cotton Soil',
+      majorCrops: ['cotton', 'sugarcane', 'wheat', 'rice']
+    },
+    punjab: {
+      name: 'Punjab',
+      weather: { temp: 28, humidity: 72, rainfall: 15 },
+      soilType: 'Alluvial Soil',
+      majorCrops: ['wheat', 'rice', 'maize', 'cotton']
+    },
+    tamilnadu: {
+      name: 'Tamil Nadu',
+      weather: { temp: 30, humidity: 75, rainfall: 35 },
+      soilType: 'Red Soil',
+      majorCrops: ['rice', 'sugarcane', 'cotton', 'groundnut']
+    },
+    karnataka: {
+      name: 'Karnataka',
+      weather: { temp: 29, humidity: 70, rainfall: 40 },
+      soilType: 'Red Sandy Soil',
+      majorCrops: ['rice', 'ragi', 'sugarcane', 'cotton']
+    }
+  };
+
+  // Crop database
+  const cropData = {
+    rice: {
+      name: { en: 'Rice', hi: 'चावल', te: 'వరి' },
+      optimalPH: [6.0, 7.0],
+      optimalMoisture: [70, 85],
+      optimalTemp: [25, 35],
+      nutrients: { N: 120, P: 60, K: 40 },
+      irrigationFreq: 2
+    },
+    wheat: {
+      name: { en: 'Wheat', hi: 'गेहूं', te: 'గోధుమ' },
+      optimalPH: [6.5, 7.5],
+      optimalMoisture: [50, 70],
+      optimalTemp: [15, 25],
+      nutrients: { N: 150, P: 60, K: 40 },
+      irrigationFreq: 7
+    },
+    cotton: {
+      name: { en: 'Cotton', hi: 'कपास', te: 'పత్తి' },
+      optimalPH: [6.0, 8.0],
+      optimalMoisture: [60, 80],
+      optimalTemp: [25, 35],
+      nutrients: { N: 100, P: 50, K: 50 },
+      irrigationFreq: 5
+    },
+    sugarcane: {
+      name: { en: 'Sugarcane', hi: 'गन्ना', te: 'చెరకు' },
+      optimalPH: [6.5, 7.5],
+      optimalMoisture: [75, 90],
+      optimalTemp: [26, 32],
+      nutrients: { N: 200, P: 80, K: 60 },
+      irrigationFreq: 3
+    }
+  };
+
+  // Soil health calculation
+  const calculateSoilHealth = () => {
+    const crop = cropData[selectedCrop];
+    let score = 0;
+
+    // pH score (30%)
+    const phScore = soilData.ph >= crop.optimalPH[0] && soilData.ph <= crop.optimalPH[1] ? 30 : 
+                   Math.max(0, 30 - Math.abs(soilData.ph - ((crop.optimalPH[0] + crop.optimalPH[1]) / 2)) * 10);
+
+    // Moisture score (25%)
+    const moistureScore = soilData.moisture >= crop.optimalMoisture[0] && soilData.moisture <= crop.optimalMoisture[1] ? 25 :
+                         Math.max(0, 25 - Math.abs(soilData.moisture - ((crop.optimalMoisture[0] + crop.optimalMoisture[1]) / 2)) * 0.5);
+
+    // Temperature score (20%)
+    const tempScore = soilData.temperature >= crop.optimalTemp[0] && soilData.temperature <= crop.optimalTemp[1] ? 20 :
+                     Math.max(0, 20 - Math.abs(soilData.temperature - ((crop.optimalTemp[0] + crop.optimalTemp[1]) / 2)) * 1);
+
+    // Nutrient scores (25% total)
+    const nScore = Math.min(8.33, soilData.nitrogen / crop.nutrients.N * 8.33);
+    const pScore = Math.min(8.33, soilData.phosphorus / crop.nutrients.P * 8.33);
+    const kScore = Math.min(8.33, soilData.potassium / crop.nutrients.K * 8.33);
+
+    score = Math.round(phScore + moistureScore + tempScore + nScore + pScore + kScore);
+    return Math.min(100, Math.max(0, score));
+  };
+
+  // Get health status
+  const getHealthStatus = (score) => {
+    const t = translations[language];
+    if (score >= 80) return { status: t.excellent, color: 'text-green-600', bgColor: 'bg-green-100' };
+    if (score >= 65) return { status: t.good, color: 'text-blue-600', bgColor: 'bg-blue-100' };
+    if (score >= 45) return { status: t.moderate, color: 'text-yellow-600', bgColor: 'bg-yellow-100' };
+    if (score >= 25) return { status: t.poor, color: 'text-orange-600', bgColor: 'bg-orange-100' };
+    return { status: t.critical, color: 'text-red-600', bgColor: 'bg-red-100' };
+  };
+
+  // Calculate fertilizer recommendations
+  const getFertilizerRecommendations = () => {
+    const crop = cropData[selectedCrop];
+    const nDeficit = Math.max(0, crop.nutrients.N - soilData.nitrogen);
+    const pDeficit = Math.max(0, crop.nutrients.P - soilData.phosphorus);
+    const kDeficit = Math.max(0, crop.nutrients.K - soilData.potassium);
+
+    return {
+      urea: Math.round(nDeficit * 2.17), // Urea is 46% N
+      dap: Math.round(pDeficit * 2.17), // DAP is 46% P2O5
+      mop: Math.round(kDeficit * 1.67)  // MOP is 60% K2O
+    };
+  };
+
+  // Calculate next irrigation
+  const getNextIrrigation = () => {
+    const crop = cropData[selectedCrop];
+    const moistureDeficit = crop.optimalMoisture[0] - soilData.moisture;
+    
+    if (moistureDeficit > 0) {
+      return { time: 0, unit: 'now' };
+    }
+    
+    const daysUntilNext = crop.irrigationFreq;
+    return { time: daysUntilNext, unit: translations[language].days };
+  };
+
+  // Generate alerts
+  useEffect(() => {
+    const newAlerts = [];
+    const t = translations[language];
+    const crop = cropData[selectedCrop];
+
+    if (soilData.moisture < crop.optimalMoisture[0]) {
+      newAlerts.push({
+        type: 'warning',
+        message: `${t.soilAlert}: ${t.moisture} ${t.poor} - ${soilData.moisture}%`
+      });
+    }
+
+    if (soilData.ph < crop.optimalPH[0] || soilData.ph > crop.optimalPH[1]) {
+      newAlerts.push({
+        type: 'warning',
+        message: `${t.soilAlert}: ${t.ph} ${soilData.ph < crop.optimalPH[0] ? 'low' : 'high'} - ${soilData.ph}`
+      });
+    }
+
+    if (soilData.temperature > crop.optimalTemp[1]) {
+      newAlerts.push({
+        type: 'danger',
+        message: `${t.weatherAlert}: High temperature - ${soilData.temperature}°C`
+      });
+    }
+
+    setAlerts(newAlerts);
+  }, [soilData, selectedCrop, language]);
+
+  // Simulate sensor data updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSoilData(prev => ({
+        ...prev,
+        moisture: Math.max(20, Math.min(90, prev.moisture + (Math.random() - 0.5) * 2)),
+        ph: Math.max(4.0, Math.min(9.0, prev.ph + (Math.random() - 0.5) * 0.1)),
+        temperature: Math.max(15, Math.min(40, prev.temperature + (Math.random() - 0.5) * 1)),
+        nitrogen: Math.max(50, Math.min(400, prev.nitrogen + (Math.random() - 0.5) * 10)),
+        phosphorus: Math.max(5, Math.min(50, prev.phosphorus + (Math.random() - 0.5) * 2)),
+        potassium: Math.max(50, Math.min(300, prev.potassium + (Math.random() - 0.5) * 5)),
+        lastUpdated: new Date()
+      }));
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const t = translations[language];
+  const healthScore = calculateSoilHealth();
+  const healthStatus = getHealthStatus(healthScore);
+  const fertilizerRecs = getFertilizerRecommendations();
+  const nextIrrigation = getNextIrrigation();
+  const currentRegionData = regionData[currentRegion];
+
+  const ParameterCard = ({ title, value, unit, optimal, color, icon }) => (
+    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-gray-600">{title}</span>
+        <span className="text-2xl">{icon}</span>
+      </div>
+      <div className="flex items-baseline space-x-1">
+        <span className={`text-2xl font-bold ${color}`}>{value}</span>
+        <span className="text-sm text-gray-500">{unit}</span>
+      </div>
+      {optimal && (
+        <div className="mt-2 text-xs text-gray-500">
+          Optimal: {optimal[0]} - {optimal[1]} {unit}
+        </div>
+      )}
+      <div className="mt-2 bg-gray-200 rounded-full h-2">
+        <div 
+          className={`h-2 rounded-full transition-all duration-500 ${color.includes('red') ? 'bg-red-400' : 
+                     color.includes('yellow') ? 'bg-yellow-400' : 
+                     color.includes('green') ? 'bg-green-400' : 'bg-blue-400'}`}
+          style={{ width: `${Math.min(100, (value / (optimal ? optimal[1] : 100)) * 100)}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-green-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-xl">🌱</span>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <select 
+                value={language} 
+                onChange={(e) => setLanguage(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="en">English</option>
+                <option value="hi">हिंदी</option>
+                <option value="te">తెలుగు</option>
+              </select>
+              
+              <select 
+                value={currentRegion} 
+                onChange={(e) => setCurrentRegion(e.target.value)}
+                className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              >
+                {Object.entries(regionData).map(([key, region]) => (
+                  <option key={key} value={key}>{region.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Alerts */}
+      {alerts.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="space-y-2">
+            {alerts.map((alert, index) => (
+              <div key={index} className={`p-3 rounded-md ${alert.type === 'warning' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'} flex items-center space-x-2`}>
+                <span className="text-lg">⚠️</span>
+                <span className="text-sm font-medium">{alert.message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Soil Parameters */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Soil Health Score */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t.healthScore}</h2>
+              <div className="flex items-center space-x-4">
+                <div className="relative w-32 h-32">
+                  <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="3"
+                    />
+                    <path
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none"
+                      stroke={healthScore >= 80 ? "#10b981" : healthScore >= 65 ? "#3b82f6" : healthScore >= 45 ? "#f59e0b" : "#ef4444"}
+                      strokeWidth="3"
+                      strokeDasharray={`${healthScore}, 100`}
+                      className="transition-all duration-1000 ease-out"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-3xl font-bold text-gray-900">{healthScore}</span>
+                  </div>
+                </div>
+                <div>
+                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${healthStatus.bgColor} ${healthStatus.color}`}>
+                    {healthStatus.status}
+                  </div>
+                  <p className="text-gray-600 mt-2">Based on {cropData[selectedCrop].name[language]} requirements</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Soil Parameters Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <ParameterCard
+                title={t.moisture}
+                value={soilData.moisture.toFixed(1)}
+                unit="%"
+                optimal={cropData[selectedCrop].optimalMoisture}
+                color={soilData.moisture >= cropData[selectedCrop].optimalMoisture[0] && soilData.moisture <= cropData[selectedCrop].optimalMoisture[1] ? "text-green-600" : "text-red-600"}
+                icon="💧"
+              />
+              <ParameterCard
+                title={t.ph}
+                value={soilData.ph.toFixed(1)}
+                unit=""
+                optimal={cropData[selectedCrop].optimalPH}
+                color={soilData.ph >= cropData[selectedCrop].optimalPH[0] && soilData.ph <= cropData[selectedCrop].optimalPH[1] ? "text-green-600" : "text-red-600"}
+                icon="⚗️"
+              />
+              <ParameterCard
+                title={t.temperature}
+                value={soilData.temperature.toFixed(1)}
+                unit="°C"
+                optimal={cropData[selectedCrop].optimalTemp}
+                color={soilData.temperature >= cropData[selectedCrop].optimalTemp[0] && soilData.temperature <= cropData[selectedCrop].optimalTemp[1] ? "text-green-600" : "text-red-600"}
+                icon="🌡️"
+              />
+              <ParameterCard
+                title={t.nitrogen}
+                value={soilData.nitrogen.toFixed(0)}
+                unit="kg/ha"
+                optimal={[cropData[selectedCrop].nutrients.N * 0.8, cropData[selectedCrop].nutrients.N * 1.2]}
+                color={soilData.nitrogen >= cropData[selectedCrop].nutrients.N * 0.8 ? "text-green-600" : "text-yellow-600"}
+                icon="🟦"
+              />
+              <ParameterCard
+                title={t.phosphorus}
+                value={soilData.phosphorus.toFixed(0)}
+                unit="kg/ha"
+                optimal={[cropData[selectedCrop].nutrients.P * 0.8, cropData[selectedCrop].nutrients.P * 1.2]}
+                color={soilData.phosphorus >= cropData[selectedCrop].nutrients.P * 0.8 ? "text-green-600" : "text-yellow-600"}
+                icon="🟨"
+              />
+              <ParameterCard
+                title={t.potassium}
+                value={soilData.potassium.toFixed(0)}
+                unit="kg/ha"
+                optimal={[cropData[selectedCrop].nutrients.K * 0.8, cropData[selectedCrop].nutrients.K * 1.2]}
+                color={soilData.potassium >= cropData[selectedCrop].nutrients.K * 0.8 ? "text-green-600" : "text-yellow-600"}
+                icon="🟥"
+              />
+            </div>
+          </div>
+
+          {/* Right Column - Recommendations */}
+          <div className="space-y-6">
+            
+            {/* Crop Selection */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.selectCrop}</h3>
+              <select 
+                value={selectedCrop} 
+                onChange={(e) => setSelectedCrop(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              >
+                {Object.entries(cropData).map(([key, crop]) => (
+                  <option key={key} value={key}>{crop.name[language]}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Regional Info */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.region}: {currentRegionData.name}</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Temperature:</span>
+                  <span className="font-medium">{currentRegionData.weather.temp}°C</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Humidity:</span>
+                  <span className="font-medium">{currentRegionData.weather.humidity}%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Soil Type:</span>
+                  <span className="font-medium text-sm">{currentRegionData.soilType}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Fertilizer Recommendations */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.fertilizer}</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">{t.urea}:</span>
+                  <span className="font-bold text-green-600">{fertilizerRecs.urea} {t.kg} {t.perAcre}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">{t.dap}:</span>
+                  <span className="font-bold text-blue-600">{fertilizerRecs.dap} {t.kg} {t.perAcre}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">{t.mop}:</span>
+                  <span className="font-bold text-red-600">{fertilizerRecs.mop} {t.kg} {t.perAcre}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Irrigation Schedule */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.irrigation}</h3>
+              <div className="text-center">
+                <div className="text-3xl mb-2">💧</div>
+                <div className="text-lg font-medium text-gray-900">{t.nextIrrigation}</div>
+                {nextIrrigation.unit === 'now' ? (
+                  <div className="text-2xl font-bold text-red-600">Now!</div>
+                ) : (
+                  <div className="text-2xl font-bold text-blue-600">
+                    {nextIrrigation.time} {nextIrrigation.unit}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Manual Entry Button */}
+            <button
+              onClick={() => setShowManualEntry(!showManualEntry)}
+              className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors duration-200 flex items-center justify-center space-x-2"
+            >
+              <span>📝</span>
+              <span>{t.manualEntry}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Manual Entry Modal */}
+        {showManualEntry && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-4">{t.manualEntry}</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.moisture} (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={soilData.moisture}
+                    onChange={(e) => setSoilData(prev => ({...prev, moisture: parseFloat(e.target.value)}))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.ph}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="14"
+                    step="0.1"
+                    value={soilData.ph}
+                    onChange={(e) => setSoilData(prev => ({...prev, ph: parseFloat(e.target.value)}))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.temperature} (°C)</label>
+                  <input
+                    type="number"
+                    value={soilData.temperature}
+                    onChange={(e) => setSoilData(prev => ({...prev, temperature: parseFloat(e.target.value)}))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setShowManualEntry(false)}
+                    className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSoilData(prev => ({...prev, lastUpdated: new Date()}));
+                      setShowManualEntry(false);
+                    }}
+                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    {t.save}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center text-gray-600">
+            <p>Last updated: {soilData.lastUpdated.toLocaleString()}</p>
+            <p className="text-sm mt-2">🌱 Optimized for Indian Agricultural Conditions</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;
